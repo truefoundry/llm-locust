@@ -38,7 +38,6 @@ class MetricsCollector:
         self.quantiles: list[int] = quantiles if quantiles is not None else [50]
         self.metrics_window_size: int = metrics_window_size
         self.computed_metrics_task = None
-        self.service_metrics_task = None
         self.collection_task = None
         self.metrics_queue = metrics_queue
         self.model_client = model_client
