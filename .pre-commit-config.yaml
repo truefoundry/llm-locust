@@ -1,0 +1,23 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+    - id: check-docstring-first
+    - id: check-merge-conflict
+    - id: debug-statements
+    - id: detect-private-key
+    - id: trailing-whitespace
+    - id: end-of-file-fixer
+    - id: check-yaml
+    - id: check-ast
+    - id: check-added-large-files
+      exclude: ^inputs\.json$
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.7.0
+  hooks:
+    - id: ruff
+      args:
+        - --config=pyproject.toml
+        - --fix
+    - id: ruff-format

@@ -1,0 +1,37 @@
+[project]
+name = "llm_benchmarking"
+version = "0.1.0"
+description = "LLM Benchmarking tool"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiohttp==3.10.11",
+    "transformers==4.48.0",
+    "numpy==1.26.4",
+    "Jinja2==3.1.6",
+    "fastapi==0.115.3",
+    "python-multipart==0.0.18",
+    "uvicorn==0.32.0",
+    "colorlog==6.9.0",
+]
+
+[tool.ruff]
+lint.select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "Q",  # flake8-quotes
+    "I",  # isort
+    "SIM",# flake8-simplify
+    "UP", # pyupgrade
+    "ANN", # flake8-annotations
+    "RET", # flake8-return
+    "ASYNC", # flake8-async
+]
+lint.ignore = ["E501", "ANN101", "ANN102", "ANN002", "ANN003", "RET504"]
+exclude = [".venv"]
+
+[tool.ruff.lint.flake8-annotations]
+mypy-init-return = true
