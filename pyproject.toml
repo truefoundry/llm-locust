@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "aiohttp==3.10.11",
-    "transformers==4.48.0",
+    "transformers==4.50.0",
     "numpy==1.26.4",
     "Jinja2==3.1.6",
     "fastapi==0.115.3",
