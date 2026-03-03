@@ -19,6 +19,10 @@ class BaseModelClient:
         Should not have blocking code"""
         raise NotImplementedError
 
+    def reset_parse_state(self) -> None:
+        """Reset any internal parsing state between requests"""
+        pass
+
     def parse_response(self, chunk: bytes) -> list[int]:
         """Parse response bytes into list of tokens"""
         raise NotImplementedError
@@ -47,7 +51,7 @@ class OpenAIChatStreamingClient(BaseModelClient):
         self.tokenizer = tokenizer
         self.ignore_eos = ignore_eos
         self.openai_api_key = openai_api_key
-        self.chunk_cache = {}
+        self.buffer = ""
         random.seed(seed)
 
     def ping_url(self) -> str:
@@ -83,27 +87,40 @@ class OpenAIChatStreamingClient(BaseModelClient):
             data["model"] = self.openai_model_name
         return url, headers, data, prompt
 
+    def reset_parse_state(self) -> None:
+        self.buffer = ""
+
     def parse_response(self, chunk: bytes) -> list[int]:
-        if chunk not in self.chunk_cache:
-            data = chunk.decode("utf-8").strip()
-            output = []
-            for line in data.split("\n"):
-                if line.strip():
-                    if len(line.split(":", 1)) == 2:
-                        line = line.split(":", 1)[1].strip()
-                        if line == "[DONE]":
-                            continue
-                        try:
-                            text = json.loads(line)["choices"][0]["delta"]["content"]
-                            output += self.tokenizer.encode(
-                                text, add_special_tokens=False
-                            )
-                        except Exception as e:
-                            logger.warning(
-                                f"Error while parsing chunk: {line}, error: {e}"
-                            )
-                            continue
-                    else:
-                        print(line)
-            self.chunk_cache[chunk] = output
-        return self.chunk_cache[chunk]
+        self.buffer += chunk.decode("utf-8", errors="replace")
+        output = []
+
+        while "\n" in self.buffer:
+            line, self.buffer = self.buffer.split("\n", 1)
+            line = line.strip()
+
+            if not line:
+                continue
+            if len(line.split(":", 1)) == 2:
+                line = line.split(":", 1)[1].strip()
+                if line == "[DONE]":
+                    continue
+                try:
+                    data = json.loads(line)
+                    choices = data.get("choices")
+                    if not choices:
+                        continue
+                    delta = choices[0].get("delta") or {}
+                    text = delta.get("content")
+                    if text is not None:
+                        output += self.tokenizer.encode(
+                            text, add_special_tokens=False
+                        )
+                except json.JSONDecodeError:
+                    continue
+                except Exception as e:
+                    logger.warning(
+                        "Error while parsing chunk: %s, error: %s", line[:200], e
+                    )
+                    continue
+
+        return output

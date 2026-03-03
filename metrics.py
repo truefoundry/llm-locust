@@ -301,6 +301,7 @@ class MetricsList:
         metrics_collector: object,
     ) -> None:
         for metric in self.metrics:
+            metrics_collector.model_client.reset_parse_state()
             metric.collect_request(
                 request_log=metrics_data, metrics_collector=metrics_collector
             )
