@@ -1,3 +1,7 @@
 __pycache__
 *.pyc
 databricks-dolly-15k.jsonl
+.venv/  
+.env
+.ruff_cache/
+__pycache__/

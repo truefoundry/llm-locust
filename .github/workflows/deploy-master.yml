@@ -1,0 +1,42 @@
+name: Deploy Master
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-master:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install truefoundry
+        run: pipx install --pip-args=--pre truefoundry
+
+      - name: Login to Truefoundry
+        run: |
+          tfy login --api-key "${{ secrets.TFY_API_KEY }}" --host "${{ secrets.TFY_HOST }}"
+
+      - name: Create .env file
+        run: |
+          cat <<EOF > .env
+          $LOCUST_ENV_FILE
+          EOF
+        env:
+          LOCUST_ENV_FILE: ${{ secrets.LOCUST_ENV_FILE }}
+
+      - name: Run master deploy script
+        run: |
+          set -a
+          source ./.env
+          set +a
+          python -m pip install truefoundry
+          python deploy_master.py
