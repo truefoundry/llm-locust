@@ -1,0 +1,22 @@
+services:
+  llm-locust:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Cache the default tokenizer during build for offline usage.
+        # Override this to cache a different tokenizer model.
+        TOKENIZER_MODEL: NousResearch/Meta-Llama-3.1-8B-Instruct
+    ports:
+      - "8089:8089"
+    environment:
+      # HuggingFace cache directory inside the container
+      - HF_HOME=/app/.cache/huggingface
+      # Uncomment to run fully offline (requires tokenizer cached at build time)
+      # - HF_HUB_OFFLINE=1
+    volumes:
+      # Persist HuggingFace cache across container restarts
+      - hf-cache:/app/.cache/huggingface
+
+volumes:
+  hf-cache:
