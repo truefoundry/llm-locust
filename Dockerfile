@@ -59,5 +59,11 @@ COPY ./*.py .
 COPY ./logging.conf .
 COPY ./inputs.json .
 
+# Pre-download the default tokenizer so the image can run offline.
+# Override TOKENIZER_MODEL at build time to cache a different model.
+ARG TOKENIZER_MODEL=NousResearch/Meta-Llama-3.1-8B-Instruct
+ENV HF_HOME=/app/.cache/huggingface
+RUN python -c "from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('${TOKENIZER_MODEL}')"
+
 # Default command to run the API server
 ENTRYPOINT ["python", "api.py"]
